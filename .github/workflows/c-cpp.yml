@@ -11,13 +11,15 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Setup MSYS2
       uses: msys2/setup-msys2@v2
       with:
         msystem: MINGW64
         update: true
+        # These match your README requirements
         install: >-
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-make
@@ -29,11 +31,14 @@ jobs:
     - name: Build Project
       shell: msys2 {0}
       run: |
-        make clean
-        make
+        # In the MinGW64 environment, 'make' is invoked via mingw32-make
+        mingw32-make clean
+        mingw32-make
 
-    - name: Upload Artifact
+    - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Pressure-Exe
-        path: build/Pressure.exe
+        name: Pressure-Windows-Build
+        path: |
+          build/Pressure.exe
+          font.ttf
