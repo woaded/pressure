@@ -14,5 +14,8 @@ pacman -S mingw-w64-x86_64-gcc \
           mingw-w64-x86_64-make \
           mingw-w64-x86_64-SDL2 \
           mingw-w64-x86_64-SDL2_ttf \
-          mingw-w64-x86_64-imagemagick
+          mingw-w64-x86_64-imagemagick \
+	  mingw-w64-x86_64-librsvg \
+	  mingw-w64-x86_64-libwmf
+
 ```
