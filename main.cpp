@@ -42,6 +42,7 @@ int hoverTicks = 0, winW = 320, winH = 100, fontSize = 52;
 const float ASPECT_RATIO = 100.0f / 320.0f;
 std::map<char, CachedGlyph> glyphAtlas;
 std::vector<unsigned char> fontBuffer;
+HWND previousFocus = NULL;
 
 bool IsWindowsLightMode() {
     HKEY hKey; DWORD value = 0, size = sizeof(value);
@@ -114,17 +115,14 @@ void BuildAtlas(SDL_Renderer* rr, TTF_Font* font) {
     hasColon = TTF_GlyphIsProvided(font, ':');
     std::string chars = "0123456789 ";
     if (hasColon) chars += ":";
-
     SDL_Color textColor = { 255, 255, 255, 255 };
     SDL_Color gradColor = { 208, 208, 208, 255 };
     SDL_Color outColor = { 10, 10, 10, 255 };
-
     if (isInverted) {
         textColor = { 23, 23, 23, 255 };
         gradColor = { 12, 12, 12, 255 };
         outColor = { 240, 240, 240, 255 };
     }
-
     for (char c : chars) {
         SDL_Surface* sm = TTF_RenderGlyph_Blended(font, (Uint16)c, { 255,255,255,255 });
         SDL_Surface* so = TTF_RenderGlyph_Blended(font, (Uint16)c, outColor);
@@ -140,27 +138,16 @@ std::string GetCountdownString() {
     auto now = std::chrono::system_clock::now();
     std::time_t tt = std::chrono::system_clock::to_time_t(now);
     struct tm lt; localtime_s(&lt, &tt);
-    
     int d_to_sat = (6 - lt.tm_wday + 7) % 7;
-    
-    if (d_to_sat == 0 && (lt.tm_hour > 0 || lt.tm_min > 0 || lt.tm_sec > 0)) {
-        d_to_sat = 7;
-    }
-
+    if (d_to_sat == 0 && (lt.tm_hour > 0 || lt.tm_min > 0 || lt.tm_sec > 0)) d_to_sat = 7;
     struct tm tgt = lt; 
     tgt.tm_mday += d_to_sat; 
-    tgt.tm_hour = 0; 
-    tgt.tm_min = 0; 
-    tgt.tm_sec = 0; 
-    tgt.tm_isdst = -1; 
-
+    tgt.tm_hour = 0; tgt.tm_min = 0; tgt.tm_sec = 0; tgt.tm_isdst = -1; 
     auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::from_time_t(std::mktime(&tgt)) - now);
     long long s = (diff.count() < 0) ? 0 : diff.count();
-    
     int d = (int)(s / 86400); s %= 86400;
     int h = (int)(s / 3600); s %= 3600;
     int m = (int)(s / 60); s %= 60;
-    
     char buf[24]; 
     snprintf(buf, sizeof(buf), "%01d:%02d:%02d:%02d", d, h, m, (int)s);
     std::string res(buf);
@@ -172,43 +159,34 @@ std::string GetCountdownString() {
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO); TTF_Init();
     TTF_Font* font = LoadFontToRAM("font.ttf", fontSize);
-
     if (!font) {
-        char cwd[MAX_PATH];
-        _getcwd(cwd, sizeof(cwd));
+        char cwd[MAX_PATH]; _getcwd(cwd, sizeof(cwd));
         std::string errorMsg = "Missing font file, please put font.ttf in\n" + std::string(cwd);
         TTF_Quit(); SDL_Quit();
         MessageBoxA(NULL, errorMsg.c_str(), "Font Error", MB_ICONERROR | MB_OK);
         return 1;
     }
-
     isInverted = IsWindowsLightMode();
     SDL_Window* window = SDL_CreateWindow("Pressure", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winW, winH, SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_HIDDEN);
     SDL_SysWMinfo wmInfo; SDL_VERSION(&wmInfo.version); SDL_GetWindowWMInfo(window, &wmInfo);
     HWND hwnd = wmInfo.info.win.window;
     HINSTANCE hInst = GetModuleHandle(NULL);
     HICON hExeIcon = LoadIcon(hInst, MAKEINTRESOURCE(1));
-
     SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hExeIcon);
     SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hExeIcon);
-
     ApplyDarkTheme(hwnd, !isInverted);
     SetWindowLongPtr(hwnd, GWL_EXSTYLE, GetWindowLongPtr(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     BuildAtlas(renderer, font);
     SDL_ShowWindow(window);
-
     nid.cbSize = sizeof(NOTIFYICONDATA); nid.hWnd = hwnd; nid.uID = 1; nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-    nid.uCallbackMessage = WM_TRAYICON; 
-    nid.hIcon = hExeIcon;
+    nid.uCallbackMessage = WM_TRAYICON; nid.hIcon = hExeIcon;
     strcpy_s(nid.szTip, "Pressure"); Shell_NotifyIcon(NIM_ADD, &nid);
-
     HMENU hMenu = CreatePopupMenu();
     AppendMenu(hMenu, MF_STRING, ID_TRAY_RESIZE, "Resize Mode");
     AppendMenu(hMenu, MF_STRING, ID_TRAY_INVERT, "Invert Colors");
     AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenu, MF_STRING, ID_TRAY_EXIT, "Quit");
-
     bool running = true, dragging = false; int mX = 0, mY = 0; SDL_Event ev;
     std::string lastStr = "";
 
@@ -236,7 +214,6 @@ int main(int argc, char* argv[]) {
                 if (ev.type == SDL_MOUSEBUTTONUP) dragging = false;
             }
         }
-
         if (isResizing) {
             if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 || GetAsyncKeyState(VK_RETURN) & 0x8000) {
                 isResizing = false; fontSize = (int)(52 * (winW / 320.0f));
@@ -254,22 +231,33 @@ int main(int argc, char* argv[]) {
             int gx, gy; SDL_GetGlobalMouseState(&gx, &gy);
             SDL_SetWindowPosition(window, gx - mX, gy - mY); needsRedraw = true;
         }
-
         int winX, winY, mx, my; SDL_GetWindowPosition(window, &winX, &winY); SDL_GetGlobalMouseState(&mx, &my);
         bool isInside = (mx >= winX && mx <= winX + winW && my >= winY && my <= winY + winH);
-        if (isInside || isResizing) { if (isLocked && !isResizing) { if (++hoverTicks >= 60) { isLocked = false; needsRedraw = true; } } }
-        else { if (hoverTicks != 0 || !isLocked) { needsRedraw = true; hoverTicks = 0; isLocked = true; dragging = false; } }
-
+        if (isInside || isResizing) {
+            if (isLocked && !isResizing) {
+                if (++hoverTicks >= 60) {
+                    previousFocus = GetForegroundWindow();
+                    isLocked = false;
+                    SetForegroundWindow(hwnd);
+                    needsRedraw = true;
+                }
+            }
+        }
+        else {
+            if (hoverTicks != 0 || !isLocked) {
+                if (!isLocked && previousFocus && previousFocus != hwnd) {
+                    SetForegroundWindow(previousFocus);
+                }
+                needsRedraw = true; hoverTicks = 0; isLocked = true; dragging = false;
+            }
+        }
         float targetAlpha = (!isLocked || isResizing) ? 1.0f : 0.1f;
         if (std::abs(currentAlpha - targetAlpha) > 0.01f) { currentAlpha += (targetAlpha - currentAlpha) * 0.1f; needsRedraw = true; }
-
         std::string curStr = GetCountdownString();
         if (curStr != lastStr && !isResizing) { lastStr = curStr; needsRedraw = true; }
-
         if (needsRedraw) {
             SetLayeredWindowAttributes(hwnd, RGB(0, 0, 0), (BYTE)(255 * currentAlpha), LWA_COLORKEY | LWA_ALPHA);
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); SDL_RenderClear(renderer);
-
             if (isResizing) {
                 SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
                 SDL_Rect r = { 0, 0, winW, winH }; SDL_RenderDrawRect(renderer, &r);
@@ -279,9 +267,7 @@ int main(int argc, char* argv[]) {
                 for (char c : curStr) { totalTextW += glyphAtlas[c].w; maxH = std::max(maxH, glyphAtlas[c].h); }
                 int targetWinW = (int)(totalTextW * 1.25f);
                 if (winW != targetWinW) { winW = targetWinW; SDL_SetWindowSize(window, winW, winH); }
-                int curX = (winW - totalTextW) / 2;
-                int startY = (winH - maxH) / 2;
-
+                int curX = (winW - totalTextW) / 2, startY = (winH - maxH) / 2;
                 for (char c : curStr) {
                     CachedGlyph& g = glyphAtlas[c];
                     SDL_Rect r = { curX, startY, g.w, g.h };
