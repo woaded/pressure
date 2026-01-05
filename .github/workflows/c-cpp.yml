@@ -18,9 +18,7 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         msystem: MINGW64
-        # Set 'update' to false if you don't need the absolute latest core packages; 
-        # this saves significant time.
-        update: false 
+        update: false
         install: >-
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-make
@@ -33,13 +31,13 @@ jobs:
     - name: Build Project
       shell: msys2 {0}
       run: |
-        # Only use 'clean' if strictly necessary for your build logic
         mingw32-make
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Pressure-Windows-Build
+        name: Pressure-Windows
         path: |
           build/Pressure.exe
-          font.ttf
+          build/font.ttf
+          build/INTER-LICENSE.TXT
