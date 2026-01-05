@@ -12,7 +12,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
-#include <direct.h> // For _getcwd
+#include <direct.h>
 
 #pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "uxtheme.lib")
@@ -115,8 +115,15 @@ void BuildAtlas(SDL_Renderer* rr, TTF_Font* font) {
     std::string chars = "0123456789 ";
     if (hasColon) chars += ":";
 
-    SDL_Color textColor = { 255, 255, 255, 255 }, gradColor = { 180, 180, 180, 255 }, outColor = { 10, 10, 10, 255 };
-    if (isInverted) { textColor = { 30, 30, 30, 255 }; gradColor = { 70, 70, 70, 255 }; outColor = { 240, 240, 240, 255 }; }
+    SDL_Color textColor = { 255, 255, 255, 255 };
+    SDL_Color gradColor = { 208, 208, 208, 255 };
+    SDL_Color outColor = { 10, 10, 10, 255 };
+
+    if (isInverted) {
+        textColor = { 23, 23, 23, 255 };
+        gradColor = { 12, 12, 12, 255 };
+        outColor = { 240, 240, 240, 255 };
+    }
 
     for (char c : chars) {
         SDL_Surface* sm = TTF_RenderGlyph_Blended(font, (Uint16)c, { 255,255,255,255 });
@@ -133,15 +140,29 @@ std::string GetCountdownString() {
     auto now = std::chrono::system_clock::now();
     std::time_t tt = std::chrono::system_clock::to_time_t(now);
     struct tm lt; localtime_s(&lt, &tt);
-    int d_to_f = (5 - lt.tm_wday + 7) % 7;
-    if (d_to_f == 0 && lt.tm_hour >= 17) d_to_f = 7;
-    struct tm tgt = lt; tgt.tm_mday += d_to_f; tgt.tm_hour = 17; tgt.tm_min = 0; tgt.tm_sec = 0; tgt.tm_isdst = -1;
+    
+    int d_to_sat = (6 - lt.tm_wday + 7) % 7;
+    
+    if (d_to_sat == 0 && (lt.tm_hour > 0 || lt.tm_min > 0 || lt.tm_sec > 0)) {
+        d_to_sat = 7;
+    }
+
+    struct tm tgt = lt; 
+    tgt.tm_mday += d_to_sat; 
+    tgt.tm_hour = 0; 
+    tgt.tm_min = 0; 
+    tgt.tm_sec = 0; 
+    tgt.tm_isdst = -1; 
+
     auto diff = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::from_time_t(std::mktime(&tgt)) - now);
     long long s = (diff.count() < 0) ? 0 : diff.count();
+    
     int d = (int)(s / 86400); s %= 86400;
     int h = (int)(s / 3600); s %= 3600;
     int m = (int)(s / 60); s %= 60;
-    char buf[24]; snprintf(buf, sizeof(buf), "%01d:%02d:%02d:%02d", d, h, m, (int)s);
+    
+    char buf[24]; 
+    snprintf(buf, sizeof(buf), "%01d:%02d:%02d:%02d", d, h, m, (int)s);
     std::string res(buf);
     if (!hasColon) std::replace(res.begin(), res.end(), ':', ' ');
     return res;
@@ -150,19 +171,13 @@ std::string GetCountdownString() {
 #undef main
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO); TTF_Init();
-    
-    // Attempt to load font first
     TTF_Font* font = LoadFontToRAM("font.ttf", fontSize);
-    
-    // ERROR CHECK: If font missing, kill and show dialog
+
     if (!font) {
         char cwd[MAX_PATH];
         _getcwd(cwd, sizeof(cwd));
         std::string errorMsg = "Missing font file, please put font.ttf in\n" + std::string(cwd);
-        
-        TTF_Quit();
-        SDL_Quit();
-
+        TTF_Quit(); SDL_Quit();
         MessageBoxA(NULL, errorMsg.c_str(), "Font Error", MB_ICONERROR | MB_OK);
         return 1;
     }
@@ -171,6 +186,11 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = SDL_CreateWindow("Pressure", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winW, winH, SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_HIDDEN);
     SDL_SysWMinfo wmInfo; SDL_VERSION(&wmInfo.version); SDL_GetWindowWMInfo(window, &wmInfo);
     HWND hwnd = wmInfo.info.win.window;
+    HINSTANCE hInst = GetModuleHandle(NULL);
+    HICON hExeIcon = LoadIcon(hInst, MAKEINTRESOURCE(1));
+
+    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hExeIcon);
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hExeIcon);
 
     ApplyDarkTheme(hwnd, !isInverted);
     SetWindowLongPtr(hwnd, GWL_EXSTYLE, GetWindowLongPtr(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
@@ -179,7 +199,8 @@ int main(int argc, char* argv[]) {
     SDL_ShowWindow(window);
 
     nid.cbSize = sizeof(NOTIFYICONDATA); nid.hWnd = hwnd; nid.uID = 1; nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-    nid.uCallbackMessage = WM_TRAYICON; nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    nid.uCallbackMessage = WM_TRAYICON; 
+    nid.hIcon = hExeIcon;
     strcpy_s(nid.szTip, "Pressure"); Shell_NotifyIcon(NIM_ADD, &nid);
 
     HMENU hMenu = CreatePopupMenu();
@@ -219,8 +240,7 @@ int main(int argc, char* argv[]) {
         if (isResizing) {
             if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 || GetAsyncKeyState(VK_RETURN) & 0x8000) {
                 isResizing = false; fontSize = (int)(52 * (winW / 320.0f));
-                TTF_CloseFont(font);
-                font = LoadFontToRAM("font.ttf", fontSize);
+                TTF_CloseFont(font); font = LoadFontToRAM("font.ttf", fontSize);
                 BuildAtlas(renderer, font); needsRedraw = true;
             }
             else {
@@ -257,13 +277,8 @@ int main(int argc, char* argv[]) {
             else {
                 int totalTextW = 0, maxH = 0;
                 for (char c : curStr) { totalTextW += glyphAtlas[c].w; maxH = std::max(maxH, glyphAtlas[c].h); }
-
                 int targetWinW = (int)(totalTextW * 1.25f);
-                if (winW != targetWinW) {
-                    winW = targetWinW;
-                    SDL_SetWindowSize(window, winW, winH);
-                }
-
+                if (winW != targetWinW) { winW = targetWinW; SDL_SetWindowSize(window, winW, winH); }
                 int curX = (winW - totalTextW) / 2;
                 int startY = (winH - maxH) / 2;
 
