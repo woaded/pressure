@@ -3,17 +3,16 @@ WINDRES    := windres
 CONVERT    := magick
 
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_ttf)
-SDL_LIBS   := $(shell pkg-config --libs sdl2 SDL2_ttf)
+SDL_LIBS   := $(shell pkg-config --static --libs sdl2 SDL2_ttf)
 
 CXXFLAGS   := -Os -flto -ffunction-sections -fdata-sections \
               -fno-exceptions -fno-rtti $(SDL_CFLAGS)
 
-LDFLAGS    := -Wl,--gc-sections -flto -s -static -mwindows
+LDFLAGS    := -Wl,--gc-sections -flto -s -static -static-libgcc -static-libstdc++ -mwindows
 
-LIBS       := $(SDL_LIBS) -lharfbuzz -lgraphite2 -lpng -lbz2 -lz \
-              -lbrotlidec -lbrotlicommon -luser32 -lgdi32 -lwinmm \
-              -limm32 -lole32 -loleaut32 -lshell32 -lsetupapi \
-              -lversion -luuid -lrpcrt4 -ldwrite -ldwmapi -luxtheme
+LIBS       := $(SDL_LIBS) -luser32 -lgdi32 -lwinmm -limm32 -lole32 \
+              -loleaut32 -lshell32 -lsetupapi -lversion -luuid \
+              -lrpcrt4 -ldwrite -ldwmapi -luxtheme
 
 BUILD_DIR  := build
 GEN_DIR    := generated
@@ -23,7 +22,7 @@ SVG_ICON   := icon.svg
 ICO_FILE   := $(GEN_DIR)/icon.ico
 RES_OBJ    := $(GEN_DIR)/resource.res
 
-.PHONY: all clean run
+.PHONY: all clean
 
 all: $(TARGET)
 
@@ -42,6 +41,3 @@ $(TARGET): $(SRC) $(RES_OBJ)
 clean:
 	rm -f $(TARGET)
 	rm -rf $(GEN_DIR)
-
-run: all
-	./$(TARGET)

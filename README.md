@@ -2,7 +2,7 @@
 
 This Windows 10 widget lets you watch you waste your precious time procrastinating in real time with any font of your choosing!
 
-<a href="https://github.com/woaded/pressure/releases/latest/download/Pressure.zip" target="_blank"><img src ="button.svg" width="300" href="https://github.com/woaded/pressure/releases/latest/download/Pressure.zip" /></a>
+<a href="https://github.com/woaded/pressure/releases/latest/download/Pressure.zip"><img src ="button.svg" width="300" href="https://github.com/woaded/pressure/releases/latest/download/Pressure.zip" /></a>
 
 ## Building
 Dependencies:
