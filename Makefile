@@ -37,8 +37,8 @@ $(RES_OBJ): resource.rc $(ICO_FILE)
 $(TARGET): $(SRC) $(RES_OBJ)
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(SRC) $(RES_OBJ) -o $(TARGET) $(CXXFLAGS) $(LDFLAGS) $(LIBS)
-	@cp LICENSE-INTER.txt $(BUILD_DIR)/INTER-LICENSE.TXT 2>/dev/null || cp build/LICENSE-INTER.txt $(BUILD_DIR)/INTER-LICENSE.TXT
-	@cp font.ttf $(BUILD_DIR)/font.ttf 2>/dev/null || true
+	@cp INTER-LICENSE.txt $(BUILD_DIR)/ 2>/dev/null || true
+	@cp font.ttf $(BUILD_DIR)/ 2>/dev/null || true
 
 clean:
 	rm -f $(TARGET)
