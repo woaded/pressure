@@ -3,47 +3,41 @@ name: Build Pressure
 on:
   push:
     branches: [ "main" ]
-    tags: [ "v*.*.*" ] # Triggers on tags like v1.0.1
   pull_request:
     branches: [ "main" ]
 
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: false
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-make
-            mingw-w64-x86_64-pkg-config
-            mingw-w64-x86_64-SDL2
-            mingw-w64-x86_64-SDL2_ttf
-            mingw-w64-x86_64-imagemagick
-            mingw-w64-x86_64-librsvg
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: false
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-make
+          mingw-w64-x86_64-pkg-config
+          mingw-w64-x86_64-SDL2
+          mingw-w64-x86_64-SDL2_ttf
+          mingw-w64-x86_64-imagemagick
+          mingw-w64-x86_64-librsvg
 
-      - name: Build Project
-        shell: msys2 {0}
-        run: |
-          mingw32-make
+    - name: Build Project
+      shell: msys2 {0}
+      run: |
+        mingw32-make
 
-      # ZIP the files first so the release is a single clean download
-      - name: Archive Build
-        shell: bash
-        run: |
-          cd build
-          zip -r ../Pressure-Windows.zip Pressure.exe font.ttf INTER-LICENSE.TXT
-
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: Pressure-Windows.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Pressure-Windows
+        path: |
+          build/Pressure.exe
+          build/font.ttf
+          build/INTER-LICENSE.TXT
