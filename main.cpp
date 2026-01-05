@@ -1,6 +1,6 @@
-#include <SDL.h>
-#include <SDL_ttf.h>
-#include <SDL_syswm.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_syswm.h>
 #include <windows.h>
 #include <shellapi.h>
 #include <dwmapi.h>

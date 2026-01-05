@@ -2,23 +2,26 @@ CXX        := g++
 WINDRES    := windres
 CONVERT    := magick
 
+SDL_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_ttf)
+SDL_LIBS   := $(shell pkg-config --libs sdl2 SDL2_ttf)
+
 CXXFLAGS   := -Os -flto -ffunction-sections -fdata-sections \
-              -fno-exceptions -fno-rtti -I/mingw64/include/SDL2
+              -fno-exceptions -fno-rtti $(SDL_CFLAGS)
 
 LDFLAGS    := -Wl,--gc-sections -flto -s -static -mwindows
 
-LIBS       := -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lfreetype -lharfbuzz \
-              -lgraphite2 -lpng -lbz2 -lz -lbrotlidec -lbrotlicommon -luser32 \
-              -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lsetupapi \
+LIBS       := $(SDL_LIBS) -lharfbuzz -lgraphite2 -lpng -lbz2 -lz \
+              -lbrotlidec -lbrotlicommon -luser32 -lgdi32 -lwinmm \
+              -limm32 -lole32 -loleaut32 -lshell32 -lsetupapi \
               -lversion -luuid -lrpcrt4 -ldwrite -ldwmapi -luxtheme
 
-BUILD_DIR := build
-GEN_DIR   := generated
-TARGET    := $(BUILD_DIR)/Pressure.exe
-SRC       := main.cpp
-SVG_ICON  := icon.svg
-ICO_FILE  := $(GEN_DIR)/icon.ico
-RES_OBJ   := $(GEN_DIR)/resource.res
+BUILD_DIR  := build
+GEN_DIR    := generated
+TARGET     := $(BUILD_DIR)/Pressure.exe
+SRC        := main.cpp
+SVG_ICON   := icon.svg
+ICO_FILE   := $(GEN_DIR)/icon.ico
+RES_OBJ    := $(GEN_DIR)/resource.res
 
 .PHONY: all clean run
 
