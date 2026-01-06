@@ -1,4 +1,3 @@
-<!--stop being poor-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,6 +35,15 @@
                     drop-shadow(-1px -1px 0px oklch(0.12 0 0)) 
                     drop-shadow(1px -1px 0px oklch(0.12 0 0)) 
                     drop-shadow(-1px 1px 0px oklch(0.12 0 0));
+            cursor: pointer;
+        }
+        #countdown.inverted {
+            background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
+            -webkit-background-clip: text;
+            filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) 
+                    drop-shadow(-1px -1px 0px oklch(0.96 0 0)) 
+                    drop-shadow(1px -1px 0px oklch(0.96 0 0)) 
+                    drop-shadow(-1px 1px 0px oklch(0.96 0 0));
         }
         @media (prefers-color-scheme: light) {
             body { 
@@ -48,6 +56,14 @@
                         drop-shadow(-1px -1px 0px oklch(0.96 0 0)) 
                         drop-shadow(1px -1px 0px oklch(0.96 0 0)) 
                         drop-shadow(-1px 1px 0px oklch(0.96 0 0));
+            }
+            #countdown.inverted {
+                background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
+                -webkit-background-clip: text;
+                filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) 
+                        drop-shadow(-1px -1px 0px oklch(0.12 0 0)) 
+                        drop-shadow(1px -1px 0px oklch(0.12 0 0)) 
+                        drop-shadow(-1px 1px 0px oklch(0.12 0 0));
             }
         }
         .container {
@@ -79,21 +95,40 @@
     <script>
         const el = document.getElementById('countdown');
         const fav = document.getElementById('favicon');
+        let showSeconds = true;
+
+        el.addEventListener('mouseenter', () => el.classList.add('inverted'));
+        el.addEventListener('mouseleave', () => el.classList.remove('inverted'));
+        el.addEventListener('click', () => {
+            showSeconds = !showSeconds;
+            update();
+        });
+
         function update() {
             const now = new Date();
             const tgt = new Date(now);
             tgt.setDate(now.getDate() + (6 - now.getDay() + 7) % 7 || 7);
             tgt.setHours(0, 0, 0, 0);
+            
             const diff = Math.max(0, tgt - now);
             const d = Math.floor(diff / 864e5);
             const h = Math.floor((diff / 36e5) % 24);
             const m = Math.floor((diff / 6e4) % 60);
             const s = Math.floor((diff / 1000) % 60);
+            
             const pad = (n) => n.toString().padStart(2, '0');
-            el.textContent = `${d}:${pad(h)}:${pad(m)}:${pad(s)}`;
+            
+            let parts = [];
+            if (d > 0) parts.push(d);
+            parts.push(pad(h), pad(m));
+            if (showSeconds) parts.push(pad(s));
+            
+            el.textContent = parts.join(':');
+            
             const light = window.matchMedia('(prefers-color-scheme: light)').matches;
             fav.href = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
         }
+
         setInterval(update, 1000);
         update();
     </script>

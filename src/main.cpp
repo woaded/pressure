@@ -23,6 +23,7 @@
 #define ID_TRAY_INVERT 1003
 #define IDI_ICON_LIGHT 101
 #define IDI_ICON_DARK 102
+#define CURRENT_VERSION_STR "1.3"
 
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
@@ -38,17 +39,23 @@ struct CachedGlyph {
 };
 
 NOTIFYICONDATA nid = { 0 };
-bool isLocked = true, isResizing = false, isInverted = false, hasColon = true;
+bool isLocked = true, isResizing = false, isInverted = false, hasColon = true, bShowSeconds = true;
 float currentAlpha = 0.1f;
 int hoverTicks = 0, winW = 320, winH = 100, fontSize = 52;
 const float ASPECT_RATIO = 100.0f / 320.0f;
-int hoverTickThreshold = 100; 
-float fadeIncrement = 0.05f;
-float passiveAlpha = 0.1f;
+int iHoverTickThreshold = 100; 
+float fAlphaIncrement = 0.05f;
+float fPassiveAlpha = 0.1f;
 
 std::map<char, CachedGlyph> glyphAtlas;
 std::vector<unsigned char> fontBuffer;
 HWND previousFocus = NULL;
+
+int VersionToInt(std::string v) {
+    v.erase(std::remove(v.begin(), v.end(), '.'), v.end());
+    if (v.empty()) return 0;
+    return atoi(v.c_str());
+}
 
 bool IsWindowsLightMode() {
     HKEY hKey;
@@ -74,27 +81,57 @@ void LoadConfiguration() {
     GetModuleFileNameA(NULL, path, MAX_PATH);
     std::string fullPath = path;
     size_t lastSlash = fullPath.find_last_of("\\/");
-    std::string configPath = fullPath.substr(0, lastSlash) + "\\config.ini";
+    std::string dirPath = fullPath.substr(0, lastSlash);
+    std::string configPath = dirPath + "\\Pressure.ini";
 
-    std::ifstream infile(configPath);
-    if (!infile.good()) {
+    char verBuf[16];
+    GetPrivateProfileStringA("Config", "Version", "0.0", verBuf, sizeof(verBuf), configPath.c_str());
+    
+    int currentVer = VersionToInt(CURRENT_VERSION_STR);
+    int existingVer = VersionToInt(verBuf);
+
+    if (existingVer > currentVer) {
+        std::string msg = "Please update Pressure to v" + std::string(verBuf);
+        int msgboxID = MessageBoxA(NULL, msg.c_str(), "Update Available", MB_YESNO | MB_ICONINFORMATION | MB_DEFBUTTON1);
+        if (msgboxID == IDYES) {
+            ShellExecuteA(NULL, "open", "https://github.com/woaded/pressure/releases/latest/", NULL, NULL, SW_SHOWNORMAL);
+            exit(0);
+        }
+    } else if (existingVer < currentVer) {
+        if (existingVer > 0) {
+            std::string oldConfigPath = dirPath + "\\Pressure_v" + verBuf + ".ini";
+            MoveFileA(configPath.c_str(), oldConfigPath.c_str());
+        }
         std::ofstream outfile(configPath);
         outfile << "[Config]" << std::endl;
-        outfile << "HoverTickThreshold=1" << std::endl;
-        outfile << "FadeIncrement=0.05f" << std::endl;
-        outfile << "PassiveAlpha=0.1f" << std::endl;
+        outfile << "Version=" << CURRENT_VERSION_STR << std::endl << std::endl;
+        outfile << "; Clock unlock delay when hovered in seconds" << std::endl;
+        outfile << "iHoverTickThreshold=1" << std::endl;
+        outfile << "; Fade animation speed" << std::endl;
+        outfile << "fAlphaIncrement=0.05" << std::endl;
+        outfile << "; Passive clock visibility" << std::endl;
+        outfile << "fPassiveAlpha=0.1" << std::endl;
+        outfile << "; Whether to show the seconds counter" << std::endl;
+        outfile << "bShowSeconds=true" << std::endl;
         outfile.close();
     }
 
-    hoverTickThreshold = GetPrivateProfileIntA("Config", "HoverTickThreshold", 1, configPath.c_str()) * 100;
-    char buf[32];
-    GetPrivateProfileStringA("Config", "FadeIncrement", "0.05f", buf, sizeof(buf), configPath.c_str());
+    iHoverTickThreshold = GetPrivateProfileIntA("Config", "iHoverTickThreshold", 1, configPath.c_str()) * 100;
+    
+    char buf[64];
+    GetPrivateProfileStringA("Config", "fAlphaIncrement", "0.05", buf, sizeof(buf), configPath.c_str());
     std::string fs = buf; fs.erase(std::remove(fs.begin(), fs.end(), 'f'), fs.end());
-    fadeIncrement = (float)atof(fs.c_str());
-    GetPrivateProfileStringA("Config", "PassiveAlpha", "0.1f", buf, sizeof(buf), configPath.c_str());
+    fAlphaIncrement = (float)atof(fs.c_str());
+
+    GetPrivateProfileStringA("Config", "fPassiveAlpha", "0.1", buf, sizeof(buf), configPath.c_str());
     std::string as = buf; as.erase(std::remove(as.begin(), as.end(), 'f'), as.end());
-    passiveAlpha = std::clamp((float)atof(as.c_str()), 0.0f, 1.0f);
-    currentAlpha = passiveAlpha;
+    fPassiveAlpha = std::clamp((float)atof(as.c_str()), 0.0f, 1.0f);
+    currentAlpha = fPassiveAlpha;
+
+    GetPrivateProfileStringA("Config", "bShowSeconds", "false", buf, sizeof(buf), configPath.c_str());
+    std::string ts = buf;
+    std::transform(ts.begin(), ts.end(), ts.begin(), ::tolower);
+    bShowSeconds = (ts == "true" || ts == "1");
 }
 
 TTF_Font* LoadFontToRAM(const std::string& path, int size) {
@@ -181,7 +218,14 @@ std::string GetCountdownString() {
     int d = (int)(s / 86400); s %= 86400;
     int h = (int)(s / 3600); s %= 3600;
     int m = (int)(s / 60); s %= 60;
-    char buf[24]; snprintf(buf, sizeof(buf), "%01d:%02d:%02d:%02d", d, h, m, (int)s);
+    char buf[32];
+    if (d > 0) {
+        if (bShowSeconds) snprintf(buf, sizeof(buf), "%d:%02d:%02d:%02d", d, h, m, (int)s);
+        else snprintf(buf, sizeof(buf), "%d:%02d:%02d", d, h, m);
+    } else {
+        if (bShowSeconds) snprintf(buf, sizeof(buf), "%02d:%02d:%02d", h, m, (int)s);
+        else snprintf(buf, sizeof(buf), "%02d:%02d", h, m);
+    }
     std::string res(buf); if (!hasColon) std::replace(res.begin(), res.end(), ':', ' ');
     return res;
 }
@@ -242,16 +286,6 @@ int main(int argc, char* argv[]) {
                     if (id == ID_TRAY_RESIZE) isResizing = true;
                     if (id == ID_TRAY_INVERT) { isInverted = !isInverted; ApplyDarkTheme(hwnd, !isInverted); BuildAtlas(renderer, font); UpdateIcons(hwnd); needsRedraw = true; }
                 }
-                if (winMsg.msg == WM_SETTINGCHANGE && winMsg.lParam && wcscmp((LPCWSTR)winMsg.lParam, L"ImmersiveColorSet") == 0) {
-                    bool newMode = IsWindowsLightMode();
-                    if (newMode != isInverted) {
-                        isInverted = newMode;
-                        ApplyDarkTheme(hwnd, !isInverted);
-                        BuildAtlas(renderer, font);
-                        UpdateIcons(hwnd);
-                        needsRedraw = true;
-                    }
-                }
             }
             if (!isResizing && !isLocked) {
                 if (ev.type == SDL_MOUSEBUTTONDOWN) {
@@ -287,7 +321,7 @@ int main(int argc, char* argv[]) {
         int winX, winY, mx, my; SDL_GetWindowPosition(window, &winX, &winY); SDL_GetGlobalMouseState(&mx, &my);
         bool isInside = (mx >= winX && mx <= winX + winW && my >= winY && my <= winY + winH);
         if (isInside || isResizing) {
-            if (isLocked && !isResizing && ++hoverTicks >= hoverTickThreshold) {
+            if (isLocked && !isResizing && ++hoverTicks >= iHoverTickThreshold) {
                 previousFocus = GetForegroundWindow(); isLocked = false; SetForegroundWindow(hwnd); needsRedraw = true;
             }
         } else {
@@ -297,8 +331,8 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        float targetAlpha = (!isLocked || isResizing) ? 1.0f : passiveAlpha;
-        if (std::abs(currentAlpha - targetAlpha) > 0.001f) { currentAlpha += (targetAlpha - currentAlpha) * fadeIncrement; needsRedraw = true; }
+        float targetAlpha = (!isLocked || isResizing) ? 1.0f : fPassiveAlpha;
+        if (std::abs(currentAlpha - targetAlpha) > 0.001f) { currentAlpha += (targetAlpha - currentAlpha) * fAlphaIncrement; needsRedraw = true; }
 
         std::string curStr = GetCountdownString();
         if (curStr != lastStr && !isResizing) { lastStr = curStr; needsRedraw = true; }
@@ -309,9 +343,8 @@ int main(int argc, char* argv[]) {
             if (!isResizing) {
                 int totalTextW = 0, maxH = 0;
                 for (char c : curStr) { totalTextW += glyphAtlas[c].w; maxH = std::max(maxH, glyphAtlas[c].h); }
-                int targetWinW = (int)(totalTextW * 1.25f);
-                if (winW != targetWinW) { winW = targetWinW; SDL_SetWindowSize(window, winW, winH); }
-                int curX = (winW - totalTextW) / 2, startY = (winH - maxH) / 2;
+                if (winW != totalTextW || winH != maxH) { winW = totalTextW; winH = maxH; SDL_SetWindowSize(window, winW, winH); }
+                int curX = 0, startY = 0;
                 for (char c : curStr) {
                     CachedGlyph& g = glyphAtlas[c]; SDL_Rect r = { curX, startY, g.w, g.h };
                     int o[8][2] = {{1,1},{-1,-1},{1,-1},{-1,1},{1,0},{-1,0},{0,1},{0,-1}};

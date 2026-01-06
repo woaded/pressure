@@ -5,7 +5,7 @@ CONVERT  := magick
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2 SDL2_ttf)
 SDL_LIBS   := $(shell pkg-config --static --libs sdl2 SDL2_ttf)
 
-CXXFLAGS   := -Os -flto -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti $(SDL_CFLAGS)
+CXXFLAGS   := -Os -flto -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -D_WIN32_WINNT=0x0600 $(SDL_CFLAGS)
 LDFLAGS    := -Wl,--gc-sections -flto -s -static -static-libgcc -static-libstdc++ -mwindows
 LIBS       := $(SDL_LIBS) -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lsetupapi -lversion -luuid -lrpcrt4 -ldwrite -ldwmapi -luxtheme
 
