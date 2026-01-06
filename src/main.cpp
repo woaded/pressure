@@ -42,7 +42,6 @@ bool isLocked = true, isResizing = false, isInverted = false, hasColon = true;
 float currentAlpha = 0.1f;
 int hoverTicks = 0, winW = 320, winH = 100, fontSize = 52;
 const float ASPECT_RATIO = 100.0f / 320.0f;
-
 int hoverTickThreshold = 100; 
 float fadeIncrement = 0.05f;
 float passiveAlpha = 0.1f;
@@ -81,23 +80,17 @@ void LoadConfiguration() {
     if (!infile.good()) {
         std::ofstream outfile(configPath);
         outfile << "[Config]" << std::endl;
-        outfile << "; Seconds required for the mouse to hover on the clock to make it clickable." << std::endl;
         outfile << "HoverTickThreshold=1" << std::endl;
-        outfile << "; Clock fade speed" << std::endl;
         outfile << "FadeIncrement=0.05f" << std::endl;
-        outfile << "; Transparency of the clock while passive" << std::endl;
         outfile << "PassiveAlpha=0.1f" << std::endl;
         outfile.close();
     }
 
     hoverTickThreshold = GetPrivateProfileIntA("Config", "HoverTickThreshold", 1, configPath.c_str()) * 100;
     char buf[32];
-
-
     GetPrivateProfileStringA("Config", "FadeIncrement", "0.05f", buf, sizeof(buf), configPath.c_str());
     std::string fs = buf; fs.erase(std::remove(fs.begin(), fs.end(), 'f'), fs.end());
     fadeIncrement = (float)atof(fs.c_str());
-
     GetPrivateProfileStringA("Config", "PassiveAlpha", "0.1f", buf, sizeof(buf), configPath.c_str());
     std::string as = buf; as.erase(std::remove(as.begin(), as.end(), 'f'), as.end());
     passiveAlpha = std::clamp((float)atof(as.c_str()), 0.0f, 1.0f);
@@ -197,7 +190,6 @@ std::string GetCountdownString() {
 int main(int argc, char* argv[]) {
     LoadConfiguration();
     SDL_Init(SDL_INIT_VIDEO); TTF_Init();
-    
     char exePath[MAX_PATH];
     GetModuleFileNameA(NULL, exePath, MAX_PATH);
     std::string fontPath = std::string(exePath).substr(0, std::string(exePath).find_last_of("\\/")) + "\\font.ttf";
@@ -243,9 +235,12 @@ int main(int argc, char* argv[]) {
             if (ev.type == SDL_QUIT) running = false;
             if (ev.type == SDL_SYSWMEVENT) {
                 auto& winMsg = ev.syswm.msg->msg.win;
-                if (winMsg.msg == WM_TRAYICON && LOWORD(winMsg.lParam) == WM_RBUTTONUP) {
+                if (winMsg.msg == WM_TRAYICON && (LOWORD(winMsg.lParam) == WM_RBUTTONUP || LOWORD(winMsg.lParam) == WM_LBUTTONUP)) {
                     POINT p; GetCursorPos(&p); SetForegroundWindow(hwnd);
-                    TrackPopupMenu(hMenu, TPM_LEFTALIGN, p.x, p.y, 0, hwnd, NULL);
+                    int id = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_NONOTIFY | TPM_LEFTALIGN, p.x, p.y, 0, hwnd, NULL);
+                    if (id == ID_TRAY_EXIT) running = false;
+                    if (id == ID_TRAY_RESIZE) isResizing = true;
+                    if (id == ID_TRAY_INVERT) { isInverted = !isInverted; ApplyDarkTheme(hwnd, !isInverted); BuildAtlas(renderer, font); UpdateIcons(hwnd); needsRedraw = true; }
                 }
                 if (winMsg.msg == WM_SETTINGCHANGE && winMsg.lParam && wcscmp((LPCWSTR)winMsg.lParam, L"ImmersiveColorSet") == 0) {
                     bool newMode = IsWindowsLightMode();
@@ -262,8 +257,8 @@ int main(int argc, char* argv[]) {
                 if (ev.type == SDL_MOUSEBUTTONDOWN) {
                     if (ev.button.button == SDL_BUTTON_LEFT) { dragging = true; SDL_GetMouseState(&mX, &mY); }
                     else if (ev.button.button == SDL_BUTTON_RIGHT) {
-                        POINT p; GetCursorPos(&p);
-                        int id = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, p.x, p.y, 0, hwnd, NULL);
+                        POINT p; GetCursorPos(&p); SetForegroundWindow(hwnd);
+                        int id = TrackPopupMenu(hMenu, TPM_RETURNCMD | TPM_NONOTIFY | TPM_LEFTALIGN, p.x, p.y, 0, hwnd, NULL);
                         if (id == ID_TRAY_EXIT) running = false;
                         if (id == ID_TRAY_RESIZE) isResizing = true;
                         if (id == ID_TRAY_INVERT) { isInverted = !isInverted; ApplyDarkTheme(hwnd, !isInverted); BuildAtlas(renderer, font); UpdateIcons(hwnd); needsRedraw = true; }

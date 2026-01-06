@@ -1,0 +1,101 @@
+<!--stop being poor-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pressure</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icon_dark.svg" id="favicon">
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            src: url('assets/inter/font.ttf') format('truetype');
+            font-weight: 800;
+        }
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            background: linear-gradient(to bottom, oklch(0.15 0 0), oklch(0.1 0 0));
+        }
+        #countdown {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(4rem, 15vw, 10rem);
+            font-weight: 800;
+            margin-bottom: 2rem;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) 
+                    drop-shadow(-1px -1px 0px oklch(0.12 0 0)) 
+                    drop-shadow(1px -1px 0px oklch(0.12 0 0)) 
+                    drop-shadow(-1px 1px 0px oklch(0.12 0 0));
+        }
+        @media (prefers-color-scheme: light) {
+            body { 
+                background: linear-gradient(to bottom, oklch(0.98 0 0), oklch(0.94 0 0)); 
+            }
+            #countdown {
+                background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
+                -webkit-background-clip: text;
+                filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) 
+                        drop-shadow(-1px -1px 0px oklch(0.96 0 0)) 
+                        drop-shadow(1px -1px 0px oklch(0.96 0 0)) 
+                        drop-shadow(-1px 1px 0px oklch(0.96 0 0));
+            }
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .cta-link {
+            display: inline-block;
+            width: 320px;
+            transition: transform 0.15s ease-out;
+        }
+        .cta-link:hover { transform: scale(1.02); }
+        .cta-link:active { transform: scale(0.98); }
+        img { -webkit-user-drag: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="countdown">0:00:00:00</div>
+        <a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Windows.zip" class="cta-link">
+            <picture>
+                <source media="(prefers-color-scheme: light)" srcset="assets/button_light.svg">
+                <img src="assets/button_dark.svg" alt="Download">
+            </picture>
+        </a>
+    </div>
+    <script>
+        const el = document.getElementById('countdown');
+        const fav = document.getElementById('favicon');
+        function update() {
+            const now = new Date();
+            const tgt = new Date(now);
+            tgt.setDate(now.getDate() + (6 - now.getDay() + 7) % 7 || 7);
+            tgt.setHours(0, 0, 0, 0);
+            const diff = Math.max(0, tgt - now);
+            const d = Math.floor(diff / 864e5);
+            const h = Math.floor((diff / 36e5) % 24);
+            const m = Math.floor((diff / 6e4) % 60);
+            const s = Math.floor((diff / 1000) % 60);
+            const pad = (n) => n.toString().padStart(2, '0');
+            el.textContent = `${d}:${pad(h)}:${pad(m)}:${pad(s)}`;
+            const light = window.matchMedia('(prefers-color-scheme: light)').matches;
+            fav.href = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
+        }
+        setInterval(update, 1000);
+        update();
+    </script>
+</body>
+</html>
