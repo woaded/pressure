@@ -34,6 +34,7 @@ jobs:
 
     - name: Build Project
       shell: msys2 {0}
+      working-directory: src
       run: |
         mingw32-make
 
@@ -44,4 +45,4 @@ jobs:
         path: |
           build/Pressure.exe
           build/font.ttf
-          build/INTER-LICENSE.TXT
+          build/INTER-LICENSE.txt
