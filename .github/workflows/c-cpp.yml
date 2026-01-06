@@ -1,0 +1,49 @@
+name: Build Pressure
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'README.md'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: false
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-make
+          mingw-w64-x86_64-pkg-config
+          mingw-w64-x86_64-SDL2
+          mingw-w64-x86_64-SDL2_ttf
+          mingw-w64-x86_64-imagemagick
+          mingw-w64-x86_64-librsvg
+
+    - name: Build Project
+      shell: msys2 {0}
+      run: |
+        cd src
+        mingw32-make
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Pressure-Windows
+        path: |
+          build/Pressure.exe
+          build/font.ttf
+          build/INTER-LICENSE.txt
+          build/PRESSURE-LICENSE.txt
