@@ -22,7 +22,7 @@ jobs:
       with:
         [cite_start]msystem: MINGW64 [cite: 1]
         [cite_start]update: false [cite: 2]
-        install: >-
+        [cite_start]install: >- [cite: 2]
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-make
           mingw-w64-x86_64-pkg-config
@@ -40,10 +40,10 @@ jobs:
     - name: Prepare Artifact
       shell: msys2 {0}
       run: |
-        mkdir -p release [cite: 4]
-        cp build/Pressure-Win64.exe release/ [cite: 4]
-        cp build/font.ttf release/ [cite: 4]
-        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE [cite: 4]
+        mkdir -p release 
+        cp build/Pressure-Win64.exe release/ 
+        cp build/font.ttf release/ 
+        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE 
         zip -rj Pressure-Win64.zip release/*
 
     - name: Upload Windows Build
@@ -53,9 +53,9 @@ jobs:
         [cite_start]path: Pressure-Win64.zip [cite: 4]
 
   build-linux:
-    [cite_start]runs-on: ubuntu-latest [cite: 5]
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout Code
+    - [cite_start]name: Checkout Code [cite: 5]
       [cite_start]uses: actions/checkout@v4 [cite: 5]
 
     - name: Install Dependencies
