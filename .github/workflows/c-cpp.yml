@@ -15,13 +15,13 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      [cite_start]uses: actions/checkout@v4 [cite: 1]
 
     - name: Setup MSYS2
-      uses: msys2/setup-msys2@v2
+      [cite_start]uses: msys2/setup-msys2@v2 [cite: 1]
       with:
-        msystem: MINGW64
-        update: false
+        [cite_start]msystem: MINGW64 [cite: 1]
+        [cite_start]update: false [cite: 2]
         install: >-
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-make
@@ -30,51 +30,53 @@ jobs:
           mingw-w64-x86_64-SDL2_ttf
           mingw-w64-x86_64-imagemagick
           mingw-w64-x86_64-librsvg
+          zip
 
     - name: Build Project
-      shell: msys2 {0}
-      working-directory: src
-      run: mingw32-make
+      [cite_start]shell: msys2 {0} [cite: 3]
+      [cite_start]working-directory: src [cite: 3]
+      [cite_start]run: mingw32-make [cite: 3]
 
     - name: Prepare Artifact
+      shell: msys2 {0}
       run: |
-        mkdir release
-        cp build/Pressure-Win64.exe release/
-        cp build/font.ttf release/
-        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE
-        compress-archive -Path release/* -DestinationPath Pressure-Win64.zip
+        mkdir -p release [cite: 4]
+        cp build/Pressure-Win64.exe release/ [cite: 4]
+        cp build/font.ttf release/ [cite: 4]
+        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE [cite: 4]
+        zip -rj Pressure-Win64.zip release/*
 
     - name: Upload Windows Build
-      uses: actions/upload-artifact@v4
+      [cite_start]uses: actions/upload-artifact@v4 [cite: 4]
       with:
-        name: Pressure-Win64
-        path: Pressure-Win64.zip
+        [cite_start]name: Pressure-Win64 [cite: 4]
+        [cite_start]path: Pressure-Win64.zip [cite: 4]
 
   build-linux:
-    runs-on: ubuntu-latest
+    [cite_start]runs-on: ubuntu-latest [cite: 5]
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      [cite_start]uses: actions/checkout@v4 [cite: 5]
 
     - name: Install Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev imagemagick
+        sudo apt-get update [cite: 6]
+        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev imagemagick [cite: 6]
 
     - name: Build Project
-      working-directory: src
-      run: make
+      [cite_start]working-directory: src [cite: 6]
+      [cite_start]run: make [cite: 6]
 
     - name: Prepare Artifact
       run: |
-        mkdir release
-        cp build/Pressure-Linux release/
-        cp build/font.ttf release/
-        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE
-        tar -czvf Pressure-Linux.tar.gz -C release .
+        mkdir -p release 
+        cp build/Pressure-Linux release/ 
+        cp build/font.ttf release/ 
+        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE 
+        tar -czvf Pressure-Linux-Experimental.tar.gz -C release . 
 
     - name: Upload Linux Build
-      uses: actions/upload-artifact@v4
+      [cite_start]uses: actions/upload-artifact@v4 [cite: 8]
       with:
-        name: Pressure-Linux
-        path: Pressure-Linux.tar.gz
+        [cite_start]name: Pressure-Linux [cite: 8]
+        [cite_start]path: Pressure-Linux-Experimental.tar.gz [cite: 8]
