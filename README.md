@@ -1,6 +1,6 @@
 # Watch yourself waste time in realtime.
 
-<a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Windows.zip">
+<a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Win64.zip">
   <picture>
     <img alt="Download Pressure for Windows" src="assets/button_windows.svg" width="300">
   </picture>
