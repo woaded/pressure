@@ -37,12 +37,13 @@ jobs:
       run: mingw32-make
 
     - name: Prepare Artifact
+      shell: msys2 {0}
       run: |
-        mkdir release
+        mkdir -p release
         cp build/Pressure-Win64.exe release/
         cp build/font.ttf release/
         cat LICENSE assets/defaultfont/LICENSE > release/LICENSE
-        compress-archive -Path release/* -DestinationPath Pressure-Win64.zip
+        zip -rj Pressure-Win64.zip release/*
 
     - name: Upload Windows Build
       uses: actions/upload-artifact@v4
@@ -67,14 +68,14 @@ jobs:
 
     - name: Prepare Artifact
       run: |
-        mkdir release
+        mkdir -p release
         cp build/Pressure-Linux release/
         cp build/font.ttf release/
         cat LICENSE assets/defaultfont/LICENSE > release/LICENSE
-        tar -czvf Pressure-Linux.tar.gz -C release .
+        tar -czvf Pressure-Linux-Experimental.tar.gz -C release .
 
     - name: Upload Linux Build
       uses: actions/upload-artifact@v4
       with:
         name: Pressure-Linux
-        path: Pressure-Linux.tar.gz
+        path: Pressure-Linux-Experimental.tar.gz
