@@ -14,6 +14,7 @@
         body {
             margin: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
@@ -21,6 +22,13 @@
             user-select: none;
             -webkit-user-select: none;
             background: linear-gradient(to bottom, oklch(0.15 0 0), oklch(0.1 0 0));
+        }
+        h1 {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
         }
         #countdown {
             font-family: 'Inter', sans-serif;
@@ -31,39 +39,25 @@
             background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) 
-                    drop-shadow(-1px -1px 0px oklch(0.12 0 0)) 
-                    drop-shadow(1px -1px 0px oklch(0.12 0 0)) 
-                    drop-shadow(-1px 1px 0px oklch(0.12 0 0));
+            filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) drop-shadow(-1px -1px 0px oklch(0.12 0 0)) drop-shadow(1px -1px 0px oklch(0.12 0 0)) drop-shadow(-1px 1px 0px oklch(0.12 0 0));
             cursor: pointer;
         }
         #countdown.inverted {
             background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
             -webkit-background-clip: text;
-            filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) 
-                    drop-shadow(-1px -1px 0px oklch(0.96 0 0)) 
-                    drop-shadow(1px -1px 0px oklch(0.96 0 0)) 
-                    drop-shadow(-1px 1px 0px oklch(0.96 0 0));
+            filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) drop-shadow(-1px -1px 0px oklch(0.96 0 0)) drop-shadow(1px -1px 0px oklch(0.96 0 0)) drop-shadow(-1px 1px 0px oklch(0.96 0 0));
         }
         @media (prefers-color-scheme: light) {
-            body { 
-                background: linear-gradient(to bottom, oklch(0.98 0 0), oklch(0.94 0 0)); 
-            }
+            body { background: linear-gradient(to bottom, oklch(0.98 0 0), oklch(0.94 0 0)); }
             #countdown {
                 background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
                 -webkit-background-clip: text;
-                filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) 
-                        drop-shadow(-1px -1px 0px oklch(0.96 0 0)) 
-                        drop-shadow(1px -1px 0px oklch(0.96 0 0)) 
-                        drop-shadow(-1px 1px 0px oklch(0.96 0 0));
+                filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) drop-shadow(-1px -1px 0px oklch(0.96 0 0)) drop-shadow(1px -1px 0px oklch(0.96 0 0)) drop-shadow(-1px 1px 0px oklch(0.96 0 0));
             }
             #countdown.inverted {
                 background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
                 -webkit-background-clip: text;
-                filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) 
-                        drop-shadow(-1px -1px 0px oklch(0.12 0 0)) 
-                        drop-shadow(1px -1px 0px oklch(0.12 0 0)) 
-                        drop-shadow(-1px 1px 0px oklch(0.12 0 0));
+                filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) drop-shadow(-1px -1px 0px oklch(0.12 0 0)) drop-shadow(1px -1px 0px oklch(0.12 0 0)) drop-shadow(-1px 1px 0px oklch(0.12 0 0));
             }
         }
         .container {
@@ -80,55 +74,67 @@
         .cta-link:hover { transform: scale(1.02); }
         .cta-link:active { transform: scale(0.98); }
         img { -webkit-user-drag: none; }
+        .footer {
+            position: absolute;
+            bottom: 2rem;
+        }
+        .github-icon {
+            width: 32px;
+            height: 32px;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .github-icon:hover { 
+            opacity: 1; 
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>Watch yourself waste time in realtime.</h1><br>
         <div id="countdown">0:00:00:00</div>
         <a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Windows.zip" class="cta-link">
-            <picture>
-                <source media="(prefers-color-scheme: light)" srcset="assets/button_light.svg">
-                <img src="assets/button_dark.svg" alt="Download">
-            </picture>
+            <picture><img src="assets/button_windows.svg" alt="Download"></picture>
+        </a>
+        <br>
+        <a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Linux.zip" class="cta-link">
+            <picture><img src="assets/button_linux.svg" alt="Download"></picture>
+        </a>
+    </div>
+    <div class="footer">
+        <a href="https://github.com/woaded/pressure" target="_blank">
+            <img src="assets/octocat_light.svg" alt="GitHub" class="github-icon" id="gh-icon">
         </a>
     </div>
     <script>
         const el = document.getElementById('countdown');
         const fav = document.getElementById('favicon');
+        const gh = document.getElementById('gh-icon');
         let showSeconds = true;
-
         el.addEventListener('mouseenter', () => el.classList.add('inverted'));
         el.addEventListener('mouseleave', () => el.classList.remove('inverted'));
-        el.addEventListener('click', () => {
-            showSeconds = !showSeconds;
-            update();
-        });
-
+        el.addEventListener('click', () => { showSeconds = !showSeconds; update(); });
         function update() {
             const now = new Date();
             const tgt = new Date(now);
             tgt.setDate(now.getDate() + (6 - now.getDay() + 7) % 7 || 7);
             tgt.setHours(0, 0, 0, 0);
-            
             const diff = Math.max(0, tgt - now);
             const d = Math.floor(diff / 864e5);
             const h = Math.floor((diff / 36e5) % 24);
             const m = Math.floor((diff / 6e4) % 60);
             const s = Math.floor((diff / 1000) % 60);
-            
             const pad = (n) => n.toString().padStart(2, '0');
-            
             let parts = [];
             if (d > 0) parts.push(d);
             parts.push(pad(h), pad(m));
             if (showSeconds) parts.push(pad(s));
-            
             el.textContent = parts.join(':');
-            
             const light = window.matchMedia('(prefers-color-scheme: light)').matches;
             fav.href = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
+            gh.src = light ? 'assets/octocat_dark.svg' : 'assets/octocat_light.svg';
         }
-
         setInterval(update, 1000);
         update();
     </script>

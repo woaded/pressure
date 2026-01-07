@@ -1,4 +1,4 @@
-name: Build Pressure
+name: Build and Release
 
 on:
   push:
@@ -11,9 +11,8 @@ on:
       - 'README.md'
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -35,14 +34,47 @@ jobs:
     - name: Build Project
       shell: msys2 {0}
       working-directory: src
-      run: |
-        mingw32-make
+      run: mingw32-make
 
-    - name: Upload Build Artifacts
+    - name: Prepare Artifact
+      run: |
+        mkdir release
+        cp build/Pressure-Win64.exe release/
+        cp build/font.ttf release/
+        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE
+        compress-archive -Path release/* -DestinationPath Pressure-Win64.zip
+
+    - name: Upload Windows Build
       uses: actions/upload-artifact@v4
       with:
-        name: Pressure-Windows
-        path: |
-          build/Pressure.exe
-          build/font.ttf
-          build/INTER-LICENSE.txt
+        name: Pressure-Win64
+        path: Pressure-Win64.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev imagemagick
+
+    - name: Build Project
+      working-directory: src
+      run: make
+
+    - name: Prepare Artifact
+      run: |
+        mkdir release
+        cp build/Pressure-Linux release/
+        cp build/font.ttf release/
+        cat LICENSE assets/defaultfont/LICENSE > release/LICENSE
+        tar -czvf Pressure-Linux.tar.gz -C release .
+
+    - name: Upload Linux Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: Pressure-Linux
+        path: Pressure-Linux.tar.gz
