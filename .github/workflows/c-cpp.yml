@@ -15,12 +15,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Checkout Code
-      [cite_start]uses: actions/checkout@v4 [cite: 1]
+      uses: actions/checkout@v4
 
     - name: Setup MSYS2
-      [cite_start]uses: msys2/setup-msys2@v2 [cite: 1]
+      uses: msys2/setup-msys2@v2
       with:
-        [cite_start]msystem: MINGW64 [cite: 1]
+        msystem: MINGW64
         update: false
         install: >-
           mingw-w64-x86_64-gcc
@@ -33,9 +33,9 @@ jobs:
           zip
 
     - name: Build Project
-      [cite_start]shell: msys2 {0} [cite: 3]
-      [cite_start]working-directory: src [cite: 3]
-      [cite_start]run: mingw32-make [cite: 3]
+      shell: msys2 {0}
+      working-directory: src
+      run: mingw32-make
 
     - name: Prepare Artifact
       shell: msys2 {0}
@@ -47,25 +47,25 @@ jobs:
         zip -rj Pressure-Win64.zip release/*
 
     - name: Upload Windows Build
-      [cite_start]uses: actions/upload-artifact@v4 [cite: 4]
+      uses: actions/upload-artifact@v4
       with:
-        [cite_start]name: Pressure-Win64 [cite: 4]
-        [cite_start]path: Pressure-Win64.zip [cite: 4]
+        name: Pressure-Win64
+        path: Pressure-Win64.zip
 
   build-linux:
-    [cite_start]runs-on: ubuntu-latest [cite: 4]
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
-      [cite_start]uses: actions/checkout@v4 [cite: 5]
+      uses: actions/checkout@v4
 
     - name: Install Dependencies
       run: |
-        sudo apt-get update [cite: 6]
-        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev imagemagick [cite: 6]
+        sudo apt-get update
+        sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev imagemagick
 
     - name: Build Project
-      [cite_start]working-directory: src [cite: 6]
-      [cite_start]run: make [cite: 6]
+      working-directory: src
+      run: make
 
     - name: Prepare Artifact
       run: |
@@ -76,7 +76,7 @@ jobs:
         tar -czvf Pressure-Linux-Experimental.tar.gz -C release . 
 
     - name: Upload Linux Build
-      [cite_start]uses: actions/upload-artifact@v4 [cite: 8]
+      uses: actions/upload-artifact@v4
       with:
-        [cite_start]name: Pressure-Linux [cite: 8]
-        [cite_start]path: Pressure-Linux-Experimental.tar.gz [cite: 8]
+        name: Pressure-Linux
+        path: Pressure-Linux-Experimental.tar.gz
