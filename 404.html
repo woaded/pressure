@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Not Found</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icon_dark.svg" id="favicon">
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            src: url('assets/defaultfont/font.ttf') format('truetype');
+            font-weight: 800;
+        }
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            background: linear-gradient(to bottom, oklch(0.15 0 0), oklch(0.1 0 0));
+            font-family: 'Inter', sans-serif;
+        }
+        h1 {
+            font-size: clamp(8rem, 25vw, 15rem);
+            background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            line-height: 1;
+        }
+        p {
+            color: oklch(0.7 0 0);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+            margin-top: -1rem;
+        }
+        @media (prefers-color-scheme: light) {
+            body { background: linear-gradient(to bottom, oklch(0.98 0 0), oklch(0.94 0 0)); }
+            h1 {
+                background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
+                -webkit-background-clip: text;
+            }
+            p { color: oklch(0.4 0 0); }
+        }
+        .footer {
+            position: absolute;
+            bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        .footer-icon {
+            width: 32px;
+            height: 32px;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+        }
+        a:hover .footer-icon { 
+            opacity: 1; 
+            transform: scale(1.1);
+        }
+        img {
+            -webkit-user-drag: none;
+            user-select: none;
+            pointer-events: none;
+        }
+        a {
+            -webkit-user-drag: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>404</h1>
+    <p>Clock's ticking</p>
+    <a href="index.html">
+        <img src="assets/icon_light.svg" alt="Home" class="footer-icon" id="home-icon">
+    </a>
+    
+    <div class="footer">
+        <a href="https://github.com/woaded/pressure" target="_blank">
+            <img src="assets/octocat_light.svg" alt="GitHub" class="footer-icon" id="gh-icon">
+        </a>
+    </div>
+
+    <script>
+        const fav = document.getElementById('favicon');
+        const home = document.getElementById('home-icon');
+        const gh = document.getElementById('gh-icon');
+
+        function updateTheme() {
+            const light = window.matchMedia('(prefers-color-scheme: light)').matches;
+            fav.href = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
+            home.src = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
+            gh.src = light ? 'assets/octocat_dark.svg' : 'assets/octocat_light.svg';
+        }
+
+        window.addEventListener('contextmenu', e => {
+            if (!e.target.closest('a')) e.preventDefault();
+        });
+
+        window.addEventListener('dragstart', e => {
+            if (!e.target.closest('a') || e.target.tagName === 'IMG') e.preventDefault();
+        });
+
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', updateTheme);
+        updateTheme();
+    </script>
+</body>
+</html>

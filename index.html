@@ -8,7 +8,7 @@
     <style>
         @font-face {
             font-family: 'Inter';
-            src: url('assets/inter/font.ttf') format('truetype');
+            src: url('assets/defaultfont/font.ttf') format('truetype');
             font-weight: 800;
         }
         body {
@@ -49,6 +49,10 @@
         }
         @media (prefers-color-scheme: light) {
             body { background: linear-gradient(to bottom, oklch(0.98 0 0), oklch(0.94 0 0)); }
+            h1 {
+                background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
+                -webkit-background-clip: text;
+            }
             #countdown {
                 background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
                 -webkit-background-clip: text;
@@ -70,10 +74,15 @@
             display: inline-block;
             width: 320px;
             transition: transform 0.15s ease-out;
+            -webkit-user-drag: none;
         }
         .cta-link:hover { transform: scale(1.02); }
         .cta-link:active { transform: scale(0.98); }
-        img { -webkit-user-drag: none; }
+        img { 
+            -webkit-user-drag: none;
+            user-select: none;
+            pointer-events: none;
+        }
         .footer {
             position: absolute;
             bottom: 2rem;
@@ -83,8 +92,9 @@
             height: 32px;
             opacity: 0.6;
             transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
         }
-        .github-icon:hover { 
+        a:hover .github-icon { 
             opacity: 1; 
             transform: scale(1.1);
         }
@@ -112,9 +122,11 @@
         const fav = document.getElementById('favicon');
         const gh = document.getElementById('gh-icon');
         let showSeconds = true;
+
         el.addEventListener('mouseenter', () => el.classList.add('inverted'));
         el.addEventListener('mouseleave', () => el.classList.remove('inverted'));
         el.addEventListener('click', () => { showSeconds = !showSeconds; update(); });
+
         function update() {
             const now = new Date();
             const tgt = new Date(now);
@@ -135,6 +147,15 @@
             fav.href = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
             gh.src = light ? 'assets/octocat_dark.svg' : 'assets/octocat_light.svg';
         }
+
+        window.addEventListener('contextmenu', e => {
+            if (!e.target.closest('a')) e.preventDefault();
+        });
+
+        window.addEventListener('dragstart', e => {
+            if (!e.target.closest('a') || e.target.tagName === 'IMG') e.preventDefault();
+        });
+
         setInterval(update, 1000);
         update();
     </script>
