@@ -5,7 +5,7 @@
     <img alt="Download Pressure for Windows" src="assets/button_windows.svg" width="300">
   </picture>
 </a>
-
+<br>
 <a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Linux-Experimental.tar.gz">
   <picture>
     <img alt="Download Pressure for Linux" src="assets/button_linux.svg" width="300">
