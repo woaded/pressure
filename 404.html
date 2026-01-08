@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - Not Found</title>
-    <link rel="icon" type="image/svg+xml" href="assets/icon_dark.svg" id="favicon">
+    <link rel="icon" type="image/svg+xml" href="/pressure/assets/icon_dark.svg" id="favicon">
     <style>
         @font-face {
             font-family: 'Inter';
-            src: url('assets/defaultfont/font.ttf') format('truetype');
+            src: url('/pressure/assets/defaultfont/font.ttf') format('truetype');
             font-weight: 800;
         }
         body {
@@ -79,12 +79,12 @@
     <h1>404</h1>
     <p>Clock's ticking</p>
     <a href="index.html">
-        <img src="assets/icon_light.svg" alt="Home" class="footer-icon" id="home-icon">
+        <img src="/pressure/assets/icon_light.svg" alt="Home" class="footer-icon" id="home-icon">
     </a>
     
     <div class="footer">
         <a href="https://github.com/woaded/pressure" target="_blank">
-            <img src="assets/octocat_light.svg" alt="GitHub" class="footer-icon" id="gh-icon">
+            <img src="/pressure/assets/octocat_light.svg" alt="GitHub" class="footer-icon" id="gh-icon">
         </a>
     </div>
 
@@ -95,9 +95,9 @@
 
         function updateTheme() {
             const light = window.matchMedia('(prefers-color-scheme: light)').matches;
-            fav.href = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
-            home.src = light ? 'assets/icon_dark.svg' : 'assets/icon_light.svg';
-            gh.src = light ? 'assets/octocat_dark.svg' : 'assets/octocat_light.svg';
+            fav.href = light ? '/pressure/assets/icon_dark.svg' : '/pressure/assets/icon_light.svg';
+            home.src = light ? '/pressure/assets/icon_dark.svg' : '/pressure/assets/icon_light.svg';
+            gh.src = light ? '/pressure/assets/octocat_dark.svg' : '/pressure/assets/octocat_light.svg';
         }
 
         window.addEventListener('contextmenu', e => {
