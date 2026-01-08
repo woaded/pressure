@@ -33,7 +33,7 @@ NOTIFYICONDATA g_nid = { 0 };
 HWND g_prev_focus = NULL;
 #endif
 
-#define VERSION_STR "1.4"
+#define VERSION_STR "1.5"
 
 typedef struct {
     SDL_Texture* main_tex;
