@@ -110,6 +110,10 @@
 
         window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', updateTheme);
         updateTheme();
+
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1);
     </script>
 </body>
 </html>
