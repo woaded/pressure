@@ -1,17 +1,19 @@
 #!/bin/bash
 
-BINARY="build/Pressure-Linux"
+BINARY="Pressure-Linux"
 
-if [ -f "$BINARY" ]; then
+if [ -f "build/$BINARY" ]; then
+    cd build
     chmod +x "$BINARY"
     ./"$BINARY"
 else
     echo "Binary not found, building"
-    chmod +x Build.sh
-    ./Build.sh
+    chmod +x build.sh
+    ./build.sh
     if [ $? -eq 0 ]; then
         echo "Build successful"
         echo "Launching"
+        cd build
         chmod +x "$BINARY"
         ./"$BINARY"
     else

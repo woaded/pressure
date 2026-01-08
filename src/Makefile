@@ -17,16 +17,15 @@ GEN_DIR    := ../generated
 ASSET_DIR  := ../assets
 
 ifeq ($(PLATFORM_OS),windows)
-    SDL_LIBS   := $(shell pkg-config --static --libs sdl2 SDL2_ttf)
-    CFLAGS     += -D_WIN32_WINNT=0x0600
-    LDFLAGS    := -Wl,--gc-sections -flto -s -static -static-libgcc -mwindows
-    LIBS       := $(SDL_LIBS) -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lsetupapi -lversion -luuid -lrpcrt4 -ldwrite -ldwmapi -luxtheme -lstdc++
-    RES_OBJ    := $(GEN_DIR)/resource.res
+    LIBS    := $(shell pkg-config --static --libs sdl2 SDL2_ttf) -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lsetupapi -lversion -luuid -lrpcrt4 -ldwrite -ldwmapi -luxtheme -lstdc++
+    CFLAGS  += -D_WIN32_WINNT=0x0600
+    LDFLAGS := -Wl,--gc-sections -flto -s -static -static-libgcc -mwindows
+    RES_OBJ := $(GEN_DIR)/resource.res
 else
-    SDL_LIBS   := $(shell pkg-config --libs sdl2 SDL2_ttf)
-    LDFLAGS    := -Wl,--gc-sections -flto -s
-    LIBS       := $(SDL_LIBS) -lm
-    RES_OBJ    :=
+    SDL_STATIC_LIBS := $(shell pkg-config --static --libs sdl2 SDL2_ttf)
+    LDFLAGS  := -Wl,--gc-sections -flto -s -static-libgcc -static-libstdc++
+    LIBS     := -Wl,-Bstatic -lSDL2_ttf -lSDL2 -Wl,-Bdynamic $(SDL_STATIC_LIBS) -lwayland-client -lwayland-cursor -lwayland-egl -lxkbcommon -lpthread -lm -ldl
+    RES_OBJ  :=
 endif
 
 ICO_LIGHT  := $(GEN_DIR)/icon_light.ico
