@@ -33,7 +33,7 @@ NOTIFYICONDATA g_nid = { 0 };
 HWND g_prev_focus = NULL;
 #endif
 
-#define VERSION_STR "1.5"
+#define VERSION_STR "1.6"
 
 typedef struct {
     SDL_Texture* main_tex;
@@ -62,6 +62,10 @@ int g_hover_threshold = 100;
 float g_alpha_step = 0.05f;
 float g_passive_alpha = 0.1f;
 const float G_ASPECT_RATIO = 100.0f / 320.0f;
+
+uint8_t g_target_day = 6;
+uint8_t g_target_hour = 0;
+uint8_t g_target_min = 0;
 
 GLYPH_CACHE g_atlas[256] = { 0 };
 unsigned char* g_font_mem = NULL;
@@ -111,7 +115,10 @@ void load_config(void) {
         {"HoverThreshold", "1", "Delay before window becomes interactive (seconds)"},
         {"AlphaIncrement", "0.05", "Speed of the fade animation"},
         {"PassiveAlpha", "0.1", "Opacity when not hovered (0.0 to 1.0)"},
-        {"ShowSeconds", "true", "Display seconds in countdown"}
+        {"ShowSeconds", "true", "Display seconds in countdown"},
+        {"TargetDay", "6", "Day of the week (0=Sun, 1=Mon, ..., 6=Sat)"},
+        {"TargetHour", "0", "Hour of the day (0-23)"},
+        {"TargetMinute", "0", "Minute of the hour (0-59)"}
     };
     int pair_count = sizeof(pairs) / sizeof(pairs[0]);
 
@@ -155,11 +162,17 @@ void load_config(void) {
     g_passive_alpha = (float)atof(buf);
     GetPrivateProfileStringA("Settings", "ShowSeconds", "true", buf, sizeof(buf), ini);
     g_show_seconds = (_stricmp(buf, "true") == 0 || strcmp(buf, "1") == 0);
+    g_target_day = (uint8_t)GetPrivateProfileIntA("Settings", "TargetDay", 6, ini);
+    g_target_hour = (uint8_t)GetPrivateProfileIntA("Settings", "TargetHour", 0, ini);
+    g_target_min = (uint8_t)GetPrivateProfileIntA("Settings", "TargetMinute", 0, ini);
 #else
     g_hover_threshold = 100;
     g_alpha_step = 0.05f;
     g_passive_alpha = 0.1f;
     g_show_seconds = true;
+    g_target_day = 6;
+    g_target_hour = 0;
+    g_target_min = 0;
 #endif
     if (g_passive_alpha < 0.0f) g_passive_alpha = 0.0f;
     if (g_passive_alpha > 1.0f) g_passive_alpha = 1.0f;
@@ -257,9 +270,9 @@ void get_time_str(char* buf, size_t sz) {
 #else
     localtime_r(&now, &lt);
 #endif
-    int d = (6 - lt.tm_wday + 7) % 7;
-    if (d == 0 && (lt.tm_hour > 0 || lt.tm_min > 0 || lt.tm_sec > 0)) d = 7;
-    tgt = lt; tgt.tm_mday += d; tgt.tm_hour = tgt.tm_min = tgt.tm_sec = 0; tgt.tm_isdst = -1;
+    int d = (g_target_day - lt.tm_wday + 7) % 7;
+    if (d == 0 && (lt.tm_hour > g_target_hour || (lt.tm_hour == g_target_hour && lt.tm_min >= g_target_min))) d = 7;
+    tgt = lt; tgt.tm_mday += d; tgt.tm_hour = g_target_hour; tgt.tm_min = g_target_min; tgt.tm_sec = 0; tgt.tm_isdst = -1;
     long long diff = (long long)difftime(mktime(&tgt), now);
     if (diff < 0) diff = 0;
     d = (int)(diff / 86400); diff %= 86400;

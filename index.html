@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,13 +12,15 @@
     <meta property="og:url" content="woaded.github.io/pressure" />
     <meta property="og:title" content="Pressure" />
     <meta property="og:description" content="Watch yourself waste time in realtime." />
-    <meta property="og:image" content="https://raw.githubusercontent.com/woaded/pressure/refs/heads/main/assets/pressure.png" />
+    <meta property="og:image"
+        content="https://raw.githubusercontent.com/woaded/pressure/refs/heads/main/assets/pressure.png" />
 
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="woaded.github.io/pressure" />
     <meta property="twitter:title" content="Pressure" />
     <meta property="twitter:description" content="Watch yourself waste time in realtime." />
-    <meta property="twitter:image" content="https://raw.githubusercontent.com/woaded/pressure/refs/heads/main/assets/pressure.png" />
+    <meta property="twitter:image"
+        content="https://raw.githubusercontent.com/woaded/pressure/refs/heads/main/assets/pressure.png" />
 
     <link rel="icon" type="image/svg+xml" href="assets/icon_dark.svg" id="favicon">
     <style>
@@ -26,6 +29,7 @@
             src: url('assets/defaultfont/font.ttf') format('truetype');
             font-weight: 800;
         }
+
         body {
             margin: 0;
             display: flex;
@@ -38,6 +42,7 @@
             -webkit-user-select: none;
             background: linear-gradient(to bottom, oklch(0.15 0 0), oklch(0.1 0 0));
         }
+
         h1 {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
@@ -45,6 +50,7 @@
             -webkit-text-fill-color: transparent;
             margin: 0;
         }
+
         #countdown {
             font-family: 'Inter', sans-serif;
             font-size: clamp(4rem, 15vw, 10rem);
@@ -57,51 +63,69 @@
             filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) drop-shadow(-1px -1px 0px oklch(0.12 0 0)) drop-shadow(1px -1px 0px oklch(0.12 0 0)) drop-shadow(-1px 1px 0px oklch(0.12 0 0));
             cursor: pointer;
         }
+
         #countdown.inverted {
             background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
             -webkit-background-clip: text;
             filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) drop-shadow(-1px -1px 0px oklch(0.96 0 0)) drop-shadow(1px -1px 0px oklch(0.96 0 0)) drop-shadow(-1px 1px 0px oklch(0.96 0 0));
         }
+
         @media (prefers-color-scheme: light) {
-            body { background: linear-gradient(to bottom, oklch(0.98 0 0), oklch(0.94 0 0)); }
+            body {
+                background: linear-gradient(to bottom, oklch(0.98 0 0), oklch(0.94 0 0));
+            }
+
             h1 {
                 background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
                 -webkit-background-clip: text;
             }
+
             #countdown {
                 background: linear-gradient(to bottom, oklch(0.22 0 0) 0%, oklch(0.15 0 0) 100%);
                 -webkit-background-clip: text;
                 filter: drop-shadow(1px 1px 0px oklch(0.96 0 0)) drop-shadow(-1px -1px 0px oklch(0.96 0 0)) drop-shadow(1px -1px 0px oklch(0.96 0 0)) drop-shadow(-1px 1px 0px oklch(0.96 0 0));
             }
+
             #countdown.inverted {
                 background: linear-gradient(to bottom, oklch(1 0 0) 0%, oklch(0.88 0 0) 100%);
                 -webkit-background-clip: text;
                 filter: drop-shadow(1px 1px 0px oklch(0.12 0 0)) drop-shadow(-1px -1px 0px oklch(0.12 0 0)) drop-shadow(1px -1px 0px oklch(0.12 0 0)) drop-shadow(-1px 1px 0px oklch(0.12 0 0));
             }
         }
+
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
+
         .cta-link {
             display: inline-block;
             width: 320px;
             transition: transform 0.15s ease-out;
             -webkit-user-drag: none;
         }
-        .cta-link:hover { transform: scale(1.02); }
-        .cta-link:active { transform: scale(0.98); }
-        img { 
+
+        .cta-link:hover {
+            transform: scale(1.02);
+        }
+
+        .cta-link:active {
+            transform: scale(0.98);
+        }
+
+        img {
             -webkit-user-drag: none;
             user-select: none;
             pointer-events: none;
         }
+
         .footer {
             position: absolute;
             bottom: 2rem;
         }
+
         .github-icon {
             width: 32px;
             height: 32px;
@@ -109,12 +133,14 @@
             transition: opacity 0.2s, transform 0.2s;
             pointer-events: none;
         }
-        a:hover .github-icon { 
-            opacity: 1; 
+
+        a:hover .github-icon {
+            opacity: 1;
             transform: scale(1.1);
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Watch yourself waste time in realtime.</h1><br>
@@ -123,7 +149,8 @@
             <picture><img src="assets/button_windows.svg" alt="Download"></picture>
         </a>
         <br>
-        <a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Linux-Experimental.tar.gz" class="cta-link">
+        <a href="https://github.com/woaded/pressure/releases/latest/download/Pressure-Linux-Experimental.tar.gz"
+            class="cta-link">
             <picture><img src="assets/button_linux.svg" alt="Download"></picture>
         </a>
     </div>
@@ -144,10 +171,16 @@
 
         function update() {
             const now = new Date();
-            const tgt = new Date(now);
+            let tgt = new Date(now);
             tgt.setDate(now.getDate() + (6 - now.getDay() + 7) % 7 || 7);
             tgt.setHours(0, 0, 0, 0);
-            const diff = Math.max(0, tgt - now);
+
+            let diff = tgt - now;
+            if (diff <= 0) {
+                tgt.setDate(tgt.getDate() + 7);
+                diff = tgt - now;
+            }
+
             const d = Math.floor(diff / 864e5);
             const h = Math.floor((diff / 36e5) % 24);
             const m = Math.floor((diff / 6e4) % 60);
@@ -175,4 +208,5 @@
         update();
     </script>
 </body>
+
 </html>
